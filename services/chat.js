@@ -76,7 +76,13 @@ const handleUserMessage = async (userId, text, base64Image = null, client = null
   const replyText = async (replyContent) => {
     await messagesCol.add({ role: 'user', content: textTrimmed, created_at: new Date() });
     await messagesCol.add({ role: 'assistant', content: replyContent, created_at: new Date() });
-    return [{ type: 'text', text: replyContent }];
+    
+    let finalContent = replyContent;
+    if (process.uptime() < 60) {
+      finalContent += '\n\n*(หาววว... ข้าเผลอหลับไปเมื่อกี้ ถ้ารอนานหรือต้องให้ทักซ้ำ อย่าโกรธข้านะ ตอนนี้ข้าตื่นเต็มที่แล้ว!)*';
+    }
+    
+    return [{ type: 'text', text: finalContent }];
   };
 
   // ============================================================
@@ -309,6 +315,10 @@ const handleUserMessage = async (userId, text, base64Image = null, client = null
   let replyMessages = [{ type: 'text', text: aiResponseText + replySuffix }];
   if (quickReplyObj) {
     replyMessages[0].quickReply = quickReplyObj;
+  }
+
+  if (process.uptime() < 60) {
+    replyMessages.push({ type: 'text', text: '*(หาววว... ข้าเผลอหลับไปเมื่อกี้ ถ้ารอนานหรือต้องให้ทักซ้ำ อย่าโกรธข้านะ ตอนนี้ข้าตื่นเต็มที่แล้ว!)*' });
   }
 
   return replyMessages;
