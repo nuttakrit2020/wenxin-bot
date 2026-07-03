@@ -42,6 +42,11 @@ async function handleEvent(event) {
   const userId = event.source.userId;
   const isGroup = event.source.type === 'group' || event.source.type === 'room';
 
+  // Ignore Verify Webhook from LINE console
+  if (event.replyToken === '00000000000000000000000000000000' || event.replyToken === 'ffffffffffffffffffffffffffffffff') {
+    return Promise.resolve(null);
+  }
+
   // Support Text and Image
   if (event.message.type !== 'text' && event.message.type !== 'image') {
     return Promise.resolve(null);
