@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ระบบบันทึกการเงินส่วนตัว - ติดตามรายรับรายจ่ายอย่างชาญฉลาด">
+    <meta name="keywords" content="การเงิน, บันทึกรายรับรายจ่าย, Money Tracker, ติดตามการเงิน">
+    <meta name="author" content="Money Tracker">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>💰 Money Tracker — ระบบบันทึกการเงินส่วนตัว</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========== Toast Container ========== -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ========== Loading Overlay ========== -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
+
+    <!-- ========== Background Decorations ========== -->
+    <div class="bg-decoration">
+        <div class="bg-blob bg-blob-1"></div>
+        <div class="bg-blob bg-blob-2"></div>
+        <div class="bg-blob bg-blob-3"></div>
+    </div>
+
+    <!-- ========== Header ========== -->
+    <header id="appHeader" class="app-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="app-title">
+                    <span class="title-icon">💰</span>
+                    <span class="title-text">Money Tracker</span>
+                </h1>
+                <p class="app-subtitle">ระบบบันทึกการเงินส่วนตัว</p>
+            </div>
+            <div class="header-right">
+                <div class="header-date" id="headerDate">
+                    <span class="date-icon">📅</span>
+                    <span class="date-text" id="currentDate"></span>
+                </div>
+                <div class="header-status">
+                    <span class="status-dot pulse"></span>
+                    <span class="status-text">เชื่อมต่อแล้ว</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== Main Container ========== -->
+    <main class="main-container">
+
+        <!-- ===== Summary Cards Section ===== -->
+        <section id="summarySection" class="section summary-section">
+            <div class="summary-grid">
+                <!-- Card: รายรับวันนี้ -->
+                <div class="summary-card card-income" id="cardIncome">
+                    <div class="card-icon">💚</div>
+                    <div class="card-info">
+                        <span class="card-label">รายรับวันนี้</span>
+                        <span class="card-value" id="todayIncome">
+                            <span class="skeleton skeleton-text"></span>
+                        </span>
+                    </div>
+                    <div class="card-decoration"></div>
+                </div>
+
+                <!-- Card: รายจ่ายวันนี้ -->
+                <div class="summary-card card-expense" id="cardExpense">
+                    <div class="card-icon">🔴</div>
+                    <div class="card-info">
+                        <span class="card-label">รายจ่ายวันนี้</span>
+                        <span class="card-value" id="todayExpense">
+                            <span class="skeleton skeleton-text"></span>
+                        </span>
+                    </div>
+                    <div class="card-decoration"></div>
+                </div>
+
+                <!-- Card: คงเหลือ -->
+                <div class="summary-card card-balance" id="cardBalance">
+                    <div class="card-icon">💎</div>
+                    <div class="card-info">
+                        <span class="card-label">คงเหลือ</span>
+                        <span class="card-value" id="todayBalance">
+                            <span class="skeleton skeleton-text"></span>
+                        </span>
+                    </div>
+                    <div class="card-decoration"></div>
+                </div>
+
+                <!-- Card: รายการทั้งหมด -->
+                <div class="summary-card card-total" id="cardTotal">
+                    <div class="card-icon">📊</div>
+                    <div class="card-info">
+                        <span class="card-label">รายการทั้งหมด</span>
+                        <span class="card-value" id="totalTransactions">
+                            <span class="skeleton skeleton-text"></span>
+                        </span>
+                    </div>
+                    <div class="card-decoration"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Quick Add Form Section ===== -->
+        <section id="quickAddSection" class="section quick-add-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span>➕</span> เพิ่มรายการใหม่
+                </h2>
+            </div>
+            <form id="transactionForm" class="transaction-form" autocomplete="off">
+                <div class="form-grid">
+                    <!-- ประเภท -->
+                    <div class="form-group" id="formGroupType">
+                        <label class="form-label" for="txType">ประเภท</label>
+                        <div class="select-wrapper">
+                            <select id="txType" class="form-select" required>
+                                <option value="" disabled selected>เลือกประเภท</option>
+                                <option value="income">💚 รายรับ</option>
+                                <option value="expense">🔴 รายจ่าย</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- จำนวนเงิน -->
+                    <div class="form-group" id="formGroupAmount">
+                        <label class="form-label" for="txAmount">จำนวนเงิน (฿)</label>
+                        <input
+                            type="number"
+                            id="txAmount"
+                            class="form-input"
+                            placeholder="0.00"
+                            min="0.01"
+                            step="0.01"
+                            required
+                        >
+                    </div>
+
+                    <!-- หมวดหมู่ -->
+                    <div class="form-group" id="formGroupCategory">
+                        <label class="form-label" for="txCategory">หมวดหมู่</label>
+                        <div class="select-wrapper">
+                            <select id="txCategory" class="form-select" required>
+                                <option value="" disabled selected>เลือกหมวดหมู่</option>
+                                <optgroup label="🟢 รายรับ">
+                                    <option value="เงินเดือน">💼 เงินเดือน</option>
+                                    <option value="โบนัส">🎁 โบนัส</option>
+                                    <option value="ฟรีแลนซ์">💻 ฟรีแลนซ์</option>
+                                    <option value="ลงทุน">📈 ลงทุน</option>
+                                    <option value="อื่นๆ-รับ">💰 อื่นๆ</option>
+                                </optgroup>
+                                <optgroup label="🔴 รายจ่าย">
+                                    <option value="อาหาร">🍜 อาหาร</option>
+                                    <option value="เดินทาง">🚗 เดินทาง</option>
+                                    <option value="ช้อปปิ้ง">🛍️ ช้อปปิ้ง</option>
+                                    <option value="บันเทิง">🎬 บันเทิง</option>
+                                    <option value="สุขภาพ">🏥 สุขภาพ</option>
+                                    <option value="การศึกษา">📚 การศึกษา</option>
+                                    <option value="ค่าบ้าน">🏠 ค่าบ้าน</option>
+                                    <option value="สาธารณูปโภค">💡 สาธารณูปโภค</option>
+                                    <option value="อื่นๆ-จ่าย">📦 อื่นๆ</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- รายละเอียด -->
+                    <div class="form-group" id="formGroupDescription">
+                        <label class="form-label" for="txDescription">รายละเอียด</label>
+                        <input
+                            type="text"
+                            id="txDescription"
+                            class="form-input"
+                            placeholder="เช่น ข้าวมันไก่, ค่ารถไฟฟ้า..."
+                            maxlength="100"
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-primary btn-submit">
+                    <span class="btn-icon">💾</span>
+                    <span class="btn-text">บันทึกรายการ</span>
+                    <span class="btn-loading" id="submitLoading" style="display:none;">
+                        <span class="mini-spinner"></span> กำลังบันทึก...
+                    </span>
+                </button>
+            </form>
+        </section>
+
+        <!-- ===== Charts Section ===== -->
+        <section id="chartsSection" class="section charts-section">
+            <div class="charts-grid">
+                <!-- Line Chart: Trend 7 วัน -->
+                <div class="chart-card" id="trendChartCard">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span>📈</span> รายรับ-รายจ่าย 7 วันล่าสุด
+                        </h2>
+                    </div>
+                    <div class="chart-wrapper" id="trendChartWrapper">
+                        <canvas id="trendChart"></canvas>
+                        <div class="chart-skeleton" id="trendChartSkeleton">
+                            <div class="skeleton skeleton-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart: หมวดหมู่ -->
+                <div class="chart-card" id="categoryChartCard">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span>🍩</span> สัดส่วนรายจ่ายตามหมวดหมู่
+                        </h2>
+                    </div>
+                    <div class="chart-wrapper chart-wrapper-doughnut" id="categoryChartWrapper">
+                        <canvas id="categoryChart"></canvas>
+                        <div class="chart-skeleton" id="categoryChartSkeleton">
+                            <div class="skeleton skeleton-chart-circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Transaction List Section ===== -->
+        <section id="transactionSection" class="section transaction-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span>📋</span> รายการล่าสุด
+                </h2>
+                <button id="refreshBtn" class="btn btn-ghost btn-refresh" title="รีเฟรช">
+                    🔄 รีเฟรช
+                </button>
+            </div>
+            <div class="transaction-list" id="transactionList">
+                <!-- Skeleton loading -->
+                <div class="transaction-skeleton" id="transactionSkeleton">
+                    <div class="skeleton-item">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div class="skeleton-details">
+                            <div class="skeleton skeleton-line"></div>
+                            <div class="skeleton skeleton-line-short"></div>
+                        </div>
+                        <div class="skeleton skeleton-amount"></div>
+                    </div>
+                    <div class="skeleton-item">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div class="skeleton-details">
+                            <div class="skeleton skeleton-line"></div>
+                            <div class="skeleton skeleton-line-short"></div>
+                        </div>
+                        <div class="skeleton skeleton-amount"></div>
+                    </div>
+                    <div class="skeleton-item">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div class="skeleton-details">
+                            <div class="skeleton skeleton-line"></div>
+                            <div class="skeleton skeleton-line-short"></div>
+                        </div>
+                        <div class="skeleton skeleton-amount"></div>
+                    </div>
+                </div>
+                <!-- Transaction items will be inserted here -->
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <span class="empty-icon">📭</span>
+                <p class="empty-text">ยังไม่มีรายการ</p>
+                <p class="empty-subtext">เพิ่มรายการแรกของคุณด้านบน!</p>
+            </div>
+        </section>
+
+        <!-- ===== Monthly Summary Section ===== -->
+        <section id="monthlySection" class="section monthly-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span>📆</span> สรุปรายเดือน
+                </h2>
+                <div class="month-selector-wrapper">
+                    <input type="month" id="monthSelector" class="month-selector">
+                </div>
+            </div>
+            <div class="monthly-grid" id="monthlyGrid">
+                <div class="monthly-card monthly-income" id="monthlyIncome">
+                    <div class="monthly-icon">📥</div>
+                    <div class="monthly-label">รายรับรวม</div>
+                    <div class="monthly-value" id="monthlyIncomeValue">
+                        <span class="skeleton skeleton-text"></span>
+                    </div>
+                </div>
+                <div class="monthly-card monthly-expense" id="monthlyExpense">
+                    <div class="monthly-icon">📤</div>
+                    <div class="monthly-label">รายจ่ายรวม</div>
+                    <div class="monthly-value" id="monthlyExpenseValue">
+                        <span class="skeleton skeleton-text"></span>
+                    </div>
+                </div>
+                <div class="monthly-card monthly-net" id="monthlyNet">
+                    <div class="monthly-icon">💰</div>
+                    <div class="monthly-label">คงเหลือสุทธิ</div>
+                    <div class="monthly-value" id="monthlyNetValue">
+                        <span class="skeleton skeleton-text"></span>
+                    </div>
+                </div>
+                <div class="monthly-card monthly-count" id="monthlyCount">
+                    <div class="monthly-icon">🔢</div>
+                    <div class="monthly-label">จำนวนรายการ</div>
+                    <div class="monthly-value" id="monthlyCountValue">
+                        <span class="skeleton skeleton-text"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========== Footer ========== -->
+    <footer class="app-footer">
+        <p>💰 Money Tracker &copy; 2026 — สร้างด้วย ❤️ เพื่อการเงินที่ดีกว่า</p>
+    </footer>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
